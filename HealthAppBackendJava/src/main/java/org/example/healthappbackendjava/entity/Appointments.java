@@ -1,5 +1,6 @@
 package org.example.healthappbackendjava.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.example.healthappbackendjava.enums.AppointmentStatus;
 
@@ -13,10 +14,12 @@ public class Appointments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @JsonBackReference("user-appointments")
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
+    @JsonBackReference("doctor-appointments")
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;

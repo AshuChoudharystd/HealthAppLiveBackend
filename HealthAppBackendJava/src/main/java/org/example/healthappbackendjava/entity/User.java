@@ -1,5 +1,6 @@
 package org.example.healthappbackendjava.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.example.healthappbackendjava.enums.Gender;
 import org.example.healthappbackendjava.enums.Role;
@@ -26,6 +27,7 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @JsonManagedReference("user-appointments")
     @OneToMany(mappedBy = "user")
     private List<Appointments> appointments;
 

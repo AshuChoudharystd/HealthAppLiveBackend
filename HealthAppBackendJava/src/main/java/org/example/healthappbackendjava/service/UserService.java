@@ -12,6 +12,7 @@ import org.example.healthappbackendjava.enums.Role;
 import org.example.healthappbackendjava.repository.AppointmentRepository;
 import org.example.healthappbackendjava.repository.DoctorRepository;
 import org.example.healthappbackendjava.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,18 +25,22 @@ public class UserService {
     final private DoctorRepository docRepo;
     final private DoctorMapper dMapper;
 
-    public UserService(UserRepository repo, UserMapper mapper, AppointmentRepository apRepo, DoctorRepository docRepo, DoctorMapper dMapper) {
+    final private PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository repo, UserMapper mapper, AppointmentRepository apRepo, DoctorRepository docRepo, DoctorMapper dMapper, PasswordEncoder passwordEncoder) {
         this.repo = repo;
         this.mapper = mapper;
         this.apRepo = apRepo;
         this.docRepo = docRepo;
         this.dMapper = dMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
 //    create user
     public UserDto createUser(UserDto dto){
         User user = mapper.dtoToUser(dto);
         user.setRole(Role.USER);
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         repo.save(user);
         return mapper.userToDto(user);
     }
@@ -45,7 +50,7 @@ public class UserService {
         User user = repo.findById(id).orElseThrow(()->new RuntimeException("User not found"));
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setGender(dto.getGender());
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());

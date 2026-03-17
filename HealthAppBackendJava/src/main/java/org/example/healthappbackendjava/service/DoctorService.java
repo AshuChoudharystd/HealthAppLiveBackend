@@ -12,6 +12,7 @@ import org.example.healthappbackendjava.enums.Role;
 import org.example.healthappbackendjava.repository.AppointmentRepository;
 import org.example.healthappbackendjava.repository.DoctorRepository;
 import org.example.healthappbackendjava.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,18 +25,22 @@ public class DoctorService {
     final private DoctorMapper mapper;
     final private UserMapper uMapper;
 
-    public DoctorService(DoctorRepository docRepo, UserRepository userRepo, AppointmentRepository apRepo, DoctorMapper mapper, UserMapper uMapper) {
+    final private PasswordEncoder passwordEncoder;
+
+    public DoctorService(DoctorRepository docRepo, UserRepository userRepo, AppointmentRepository apRepo, DoctorMapper mapper, UserMapper uMapper, PasswordEncoder passwordEncoder) {
         this.docRepo = docRepo;
         this.userRepo = userRepo;
         this.apRepo = apRepo;
         this.mapper = mapper;
         this.uMapper = uMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
 //    create Doctor
     public DoctorDto createDoctor(DoctorDto dto){
         Doctor doctor = mapper.dtoToDoctor(dto);
         doctor.setRole(Role.DOCTOR);
+        doctor.setPassword(passwordEncoder.encode(dto.getPassword()));
         docRepo.save(doctor);
         return mapper.doctorToDto(doctor);
     }
@@ -45,7 +50,7 @@ public class DoctorService {
         Doctor doctor = docRepo.findById(id).orElseThrow(()->new RuntimeException("Doctor not found"));
         doctor.setName(dto.getName());
         doctor.setEmail(dto.getEmail());
-        doctor.setPassword(dto.getPassword());
+        doctor.setPassword(passwordEncoder.encode(dto.getPassword()));
         doctor.setSpecialization(dto.getSpecialization());
         doctor.setPhoneNumber(dto.getPhoneNumber());
         doctor.setProfilePicture(dto.getProfilePicture());

@@ -9,6 +9,7 @@ import org.example.healthappbackendjava.enums.Role;
 import org.example.healthappbackendjava.repository.AdminRepository;
 import org.example.healthappbackendjava.repository.DoctorRepository;
 import org.example.healthappbackendjava.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,17 +22,21 @@ public class AdminService {
     final private DoctorMapper dMapper;
     final private UserMapper uMapper;
 
-    public AdminService(AdminRepository repo, UserRepository uRepo, DoctorRepository dRepo, DoctorMapper dMapper, UserMapper uMapper) {
+    final private PasswordEncoder passwordEncoder;
+
+    public AdminService(AdminRepository repo, UserRepository uRepo, DoctorRepository dRepo, DoctorMapper dMapper, UserMapper uMapper, PasswordEncoder passwordEncoder) {
         this.repo = repo;
         this.uRepo = uRepo;
         this.dRepo = dRepo;
         this.dMapper = dMapper;
         this.uMapper = uMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
 //    create admin profile
     public Admin createAdmin(Admin admin){
         admin.setRole(Role.ADMIN);
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         repo.save(admin);
         return admin;
     }
