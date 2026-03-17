@@ -1,5 +1,7 @@
 package org.example.healthappbackendjava.service;
 
+import org.example.healthappbackendjava.dto.AdminDto;
+import org.example.healthappbackendjava.dto.AdminMapper;
 import org.example.healthappbackendjava.dto.DoctorDto;
 import org.example.healthappbackendjava.dto.DoctorMapper;
 import org.example.healthappbackendjava.dto.UserDto;
@@ -19,26 +21,28 @@ public class AdminService {
     final private AdminRepository repo;
     final private UserRepository uRepo;
     final private DoctorRepository dRepo;
+    final private AdminMapper aMapper;
     final private DoctorMapper dMapper;
     final private UserMapper uMapper;
-
     final private PasswordEncoder passwordEncoder;
 
-    public AdminService(AdminRepository repo, UserRepository uRepo, DoctorRepository dRepo, DoctorMapper dMapper, UserMapper uMapper, PasswordEncoder passwordEncoder) {
+    public AdminService(AdminRepository repo, UserRepository uRepo, DoctorRepository dRepo, AdminMapper aMapper, DoctorMapper dMapper, UserMapper uMapper, PasswordEncoder passwordEncoder) {
         this.repo = repo;
         this.uRepo = uRepo;
         this.dRepo = dRepo;
+        this.aMapper = aMapper;
         this.dMapper = dMapper;
         this.uMapper = uMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
 //    create admin profile
-    public Admin createAdmin(Admin admin){
+    public AdminDto createAdmin(AdminDto dto) {
+        Admin admin = aMapper.dtoToAdmin(dto);
         admin.setRole(Role.ADMIN);
-        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+        admin.setPassword(passwordEncoder.encode(dto.getPassword()));
         repo.save(admin);
-        return admin;
+        return aMapper.adminToDto(admin);
     }
 
 //    get all users

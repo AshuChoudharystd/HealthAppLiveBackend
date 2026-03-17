@@ -1,13 +1,14 @@
 package org.example.healthappbackendjava.controller;
 
+import org.example.healthappbackendjava.dto.AdminDto;
 import org.example.healthappbackendjava.dto.DoctorDto;
 import org.example.healthappbackendjava.dto.UserDto;
-import org.example.healthappbackendjava.entity.Admin;
 import org.example.healthappbackendjava.service.AdminService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -21,7 +22,7 @@ public class AdminController {
     }
 
     @PostMapping
-    public ResponseEntity<Admin> createAdmin(@RequestBody Admin admin) {
+    public ResponseEntity<AdminDto> createAdmin(@Valid @RequestBody AdminDto admin) {
         return ResponseEntity.status(HttpStatus.CREATED).body(adminService.createAdmin(admin));
     }
 

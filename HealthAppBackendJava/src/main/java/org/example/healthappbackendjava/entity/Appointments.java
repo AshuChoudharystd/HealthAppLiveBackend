@@ -31,6 +31,12 @@ public class Appointments {
     private LocalDateTime updatedAt;
     private AppointmentStatus status;
 
+    @PrePersist
+    protected void onCreate() { createdAt = updatedAt = LocalDateTime.now(); }
+
+    @PreUpdate
+    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
+
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

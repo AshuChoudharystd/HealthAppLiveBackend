@@ -1,5 +1,6 @@
 package org.example.healthappbackendjava.controller;
 
+import jakarta.validation.Valid;
 import org.example.healthappbackendjava.dto.LoginDto;
 import org.example.healthappbackendjava.security.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,7 +24,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginDto user) throws Exception {
+    public String login(@Valid @RequestBody LoginDto user) throws Exception {
         Authentication auth = manager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
         );

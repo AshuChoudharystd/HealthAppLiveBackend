@@ -23,7 +23,14 @@ public class Doctor {
     private Role role;
     private Gender gender;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String profilePicture;
+
+    @PrePersist
+    protected void onCreate() { createdAt = updatedAt = LocalDateTime.now(); }
+
+    @PreUpdate
+    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
     private int rating;
     private double consultationFee;
     private LocalTime appointmentSlot;
@@ -49,6 +56,9 @@ public class Doctor {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

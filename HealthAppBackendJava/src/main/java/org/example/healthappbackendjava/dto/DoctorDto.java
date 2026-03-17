@@ -1,6 +1,7 @@
 package org.example.healthappbackendjava.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.*;
 import org.example.healthappbackendjava.entity.Appointments;
 import org.example.healthappbackendjava.enums.Gender;
 import org.example.healthappbackendjava.enums.Role;
@@ -15,22 +16,45 @@ public class DoctorDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private int id;
+
+    @NotBlank(message = "Name is required")
     private String name;
+
+    @NotBlank(message = "Specialization is required")
     private String specialization;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
+
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Invalid phone number")
     private String phoneNumber;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Role role;
+
+    @NotNull(message = "Gender is required")
     private Gender gender;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createdAt;
     private String profilePicture;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private int rating;
+
+    @PositiveOrZero(message = "Consultation fee must be zero or positive")
     private double consultationFee;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<Appointments> appointments;
+
+    @NotNull(message = "Appointment slot is required")
     private LocalTime appointmentSlot;
 
     public LocalTime getAppointmentSlot() { return appointmentSlot; }

@@ -27,6 +27,12 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @PrePersist
+    protected void onCreate() { createdAt = updatedAt = LocalDateTime.now(); }
+
+    @PreUpdate
+    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
+
     @JsonManagedReference("user-appointments")
     @OneToMany(mappedBy = "user")
     private List<Appointments> appointments;

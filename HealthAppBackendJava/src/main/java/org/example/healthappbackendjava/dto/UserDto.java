@@ -1,6 +1,7 @@
 package org.example.healthappbackendjava.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.*;
 import org.example.healthappbackendjava.entity.Appointments;
 import org.example.healthappbackendjava.enums.Gender;
 import org.example.healthappbackendjava.enums.Role;
@@ -14,15 +15,36 @@ public class UserDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private int id;
+
+    @NotBlank(message = "Name is required")
     private String name;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
+
+    @NotNull(message = "Gender is required")
     private Gender gender;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Role role;
+
+    @Positive(message = "Height must be positive")
     private float height;
+
+    @Positive(message = "Weight must be positive")
     private float weight;
+
+    @Min(value = 1, message = "Age must be at least 1")
+    @Max(value = 120, message = "Age must be at most 120")
     private int age;
+
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^\\+?[0-9]{7,15}$", message = "Invalid phone number")
     private String phoneNumber;
     private String profilePicture;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
