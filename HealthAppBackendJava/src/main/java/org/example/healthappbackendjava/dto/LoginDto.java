@@ -2,6 +2,8 @@ package org.example.healthappbackendjava.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.example.healthappbackendjava.entity.User;
+import org.example.healthappbackendjava.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
 @Component

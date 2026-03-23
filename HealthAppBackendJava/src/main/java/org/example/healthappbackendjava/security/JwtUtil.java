@@ -12,16 +12,17 @@ public class JwtUtil {
     private final String SECRET_KEY = "ashu8797AshuJaat@@0087##7830!!0065";
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
-    public String generateToken(String email){
+    public String generateToken(String email, int userId){
         return Jwts.builder()
-                .subject(email)
+                .subject(String.valueOf(userId))
+                .claim("email",email)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(key)
                 .compact();
     }
 
-    public String extractEmail(String token){
+    public String extractUserId(String token){
         return Jwts.parser()
                 .verifyWith(key)
                 .build()
@@ -30,7 +31,16 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    public boolean validateToken(String token, String email){
+    public String extractEmail(String token){
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("email", String.class);
+    }
+
+    public boolean validateToken(String token){
         try{
             Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;

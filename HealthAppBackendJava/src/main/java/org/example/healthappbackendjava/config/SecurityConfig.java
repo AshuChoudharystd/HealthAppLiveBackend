@@ -1,10 +1,16 @@
 package org.example.healthappbackendjava.config;
 
 
-import org.example.healthappbackendjava.security.*;
+import java.util.List;
+
 import org.example.healthappbackendjava.repository.AdminRepository;
-import org.example.healthappbackendjava.repository.UserRepository;
 import org.example.healthappbackendjava.repository.DoctorRepository;
+import org.example.healthappbackendjava.repository.UserRepository;
+import org.example.healthappbackendjava.security.CustomUserDetailService;
+import org.example.healthappbackendjava.security.JwtAccessDeniedHandler;
+import org.example.healthappbackendjava.security.JwtAuthFilter;
+import org.example.healthappbackendjava.security.JwtAuthenticationEntryPoint;
+import org.example.healthappbackendjava.security.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,8 +26,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 
 @Configuration
@@ -50,7 +54,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/**", "/api/users", "/api/users/", "/api/doctors", "/api/doctors/", "/api/admin", "/api/admin/").permitAll()
+                        .requestMatchers("/auth/**", "/api/users", "/api/users/", "/api/users/doctors", "/api/doctors", "/api/doctors/", "/api/admin", "/api/admin/").permitAll()
                         .requestMatchers("/api/users/**").hasRole("USER")
                         .requestMatchers("/api/doctors/**").hasRole("DOCTOR")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -65,7 +69,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000/"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173/", "http://localhost:5174/", "http://localhost:5175/"));
         configuration.setAllowedMethods(List.of("GET","POST","DELETE","PUT","OPTIONS"));
         configuration.setAllowedHeaders(List.of("Content-Type","Authorization"));
         configuration.setExposedHeaders(List.of("Authorization"));
