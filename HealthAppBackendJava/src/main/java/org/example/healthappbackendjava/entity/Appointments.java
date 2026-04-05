@@ -1,12 +1,22 @@
 package org.example.healthappbackendjava.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
-import org.example.healthappbackendjava.enums.AppointmentStatus;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+
+import org.example.healthappbackendjava.enums.AppointmentStatus;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 @Entity
 public class Appointments {
@@ -14,20 +24,29 @@ public class Appointments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @JsonBackReference("user-appointments")
+    @JsonIgnoreProperties({"appointments", "password"})
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @JsonBackReference("doctor-appointments")
+    @JsonIgnoreProperties({"appointments", "password"})
     @ManyToOne
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate appointmentDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime appointmentTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime appointmentEndTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
     private AppointmentStatus status;
 

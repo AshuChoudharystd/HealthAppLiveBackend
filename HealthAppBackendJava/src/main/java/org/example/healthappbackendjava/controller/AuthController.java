@@ -9,14 +9,13 @@ import org.example.healthappbackendjava.repository.AdminRepository;
 import org.example.healthappbackendjava.repository.DoctorRepository;
 import org.example.healthappbackendjava.repository.UserRepository;
 import org.example.healthappbackendjava.security.JwtUtil;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -37,38 +36,55 @@ public class AuthController {
         this.adminRepository = adminRepository;
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> me(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        String email = jwtUtil.extractEmail(token);
+        String userId = jwtUtil.extractUserId(token);
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User u = userOpt.get();
+            return ResponseEntity.ok(Map.of("id", u.getId(), "email", u.getEmail(), "role", u.getRole().name(), "name", u.getName() != null ? u.getName() : ""));
+        }
+        Optional<Doctor> docOpt = doctorRepository.findByEmail(email);
+        if (docOpt.isPresent()) {
+            Doctor d = docOpt.get();
+            return ResponseEntity.ok(Map.of("id", d.getId(), "email", d.getEmail(), "role", d.getRole().name(), "name", d.getName() != null ? d.getName() : ""));
+        }
+        Optional<Admin> adminOpt = adminRepository.findByEmail(email);
+        if (adminOpt.isPresent()) {
+            Admin a = adminOpt.get();
+            return ResponseEntity.ok(Map.of("id", a.getId(), "email", a.getEmail(), "role", a.getRole().name(), "name", a.getName() != null ? a.getName() : ""));
+        }
+        return ResponseEntity.status(404).body(Map.of("error", "User not found"));
+    }
+
     @PostMapping("/login")
-    public String login(@Valid @RequestBody LoginDto user) throws Exception {
-        Authentication auth = manager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
-        );
-        if(auth.isAuthenticated()) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginDto loginRequest) {
+        try {
+            Authentication auth = manager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+            );
 
             String email = auth.getName();
 
-            // 🔥 check all tables
             Optional<User> userOpt = userRepository.findByEmail(email);
-            if(userOpt.isPresent()){
-                User u = userOpt.get();
-                return jwtUtil.generateToken(u.getEmail(),u.getId());
+            if (userOpt.isPresent()) {
+                return ResponseEntity.ok(jwtUtil.generateToken(userOpt.get().getEmail(), userOpt.get().getId()));
             }
-
             Optional<Doctor> docOpt = doctorRepository.findByEmail(email);
-            if(docOpt.isPresent()){
-                Doctor d = docOpt.get();
-                return jwtUtil.generateToken(d.getEmail(),d.getId());
+            if (docOpt.isPresent()) {
+                return ResponseEntity.ok(jwtUtil.generateToken(docOpt.get().getEmail(), docOpt.get().getId()));
             }
-
             Optional<Admin> adminOpt = adminRepository.findByEmail(email);
-            if(adminOpt.isPresent()){
-                Admin a = adminOpt.get();
-                return jwtUtil.generateToken(a.getEmail(),a.getId());
+            if (adminOpt.isPresent()) {
+                return ResponseEntity.ok(jwtUtil.generateToken(adminOpt.get().getEmail(), adminOpt.get().getId()));
             }
-
-            throw new RuntimeException("User not found");
+            return ResponseEntity.status(404).body("User not found");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Invalid email or password");
         }
-
-        return "Login Failed";
     }
 
 }

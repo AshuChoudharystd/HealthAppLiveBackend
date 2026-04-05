@@ -1,12 +1,20 @@
 package org.example.healthappbackendjava.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.example.healthappbackendjava.enums.Gender;
 import org.example.healthappbackendjava.enums.Role;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 @Entity
 public class User {
@@ -33,7 +41,7 @@ public class User {
     @PreUpdate
     protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 
-    @JsonManagedReference("user-appointments")
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Appointments> appointments;
 

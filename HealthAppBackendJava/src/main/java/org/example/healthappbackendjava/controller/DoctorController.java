@@ -1,9 +1,11 @@
 package org.example.healthappbackendjava.controller;
 
 import org.example.healthappbackendjava.dto.DoctorDto;
+import org.example.healthappbackendjava.dto.PrescriptionDto;
 import org.example.healthappbackendjava.dto.UserDto;
 import org.example.healthappbackendjava.entity.Appointments;
 import org.example.healthappbackendjava.service.DoctorService;
+import org.example.healthappbackendjava.service.PrescriptionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +18,11 @@ import java.util.List;
 public class DoctorController {
 
     private final DoctorService doctorService;
+    private final PrescriptionService prescriptionService;
 
-    public DoctorController(DoctorService doctorService) {
+    public DoctorController(DoctorService doctorService, PrescriptionService prescriptionService) {
         this.doctorService = doctorService;
+        this.prescriptionService = prescriptionService;
     }
 
     @PostMapping
@@ -26,8 +30,13 @@ public class DoctorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(doctorService.createDoctor(dto));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<DoctorDto> getDoctor(@PathVariable int id) {
+        return ResponseEntity.ok(doctorService.getDoctor(id));
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<DoctorDto> updateDoctor(@PathVariable int id, @Valid @RequestBody DoctorDto dto) {
+    public ResponseEntity<DoctorDto> updateDoctor(@PathVariable int id, @RequestBody DoctorDto dto) {
         return ResponseEntity.ok(doctorService.updateDoctor(id, dto));
     }
 
@@ -44,6 +53,16 @@ public class DoctorController {
     @PatchMapping("/appointments/{appId}/cancel")
     public ResponseEntity<Appointments> cancelAppointment(@PathVariable int appId) {
         return ResponseEntity.ok(doctorService.cancelAppointment(appId));
+    }
+
+    @PostMapping("/appointments/{appId}/prescription")
+    public ResponseEntity<PrescriptionDto> createPrescription(@PathVariable int appId, @RequestBody PrescriptionDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(prescriptionService.createPrescription(appId, dto));
+    }
+
+    @GetMapping("/prescriptions")
+    public ResponseEntity<List<PrescriptionDto>> getDoctorPrescriptions(@RequestParam int doctorId) {
+        return ResponseEntity.ok(prescriptionService.getDoctorPrescriptions(doctorId));
     }
 
     @GetMapping("/users/{userId}")

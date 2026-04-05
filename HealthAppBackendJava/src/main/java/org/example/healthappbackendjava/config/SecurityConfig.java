@@ -13,6 +13,7 @@ import org.example.healthappbackendjava.security.JwtAuthenticationEntryPoint;
 import org.example.healthappbackendjava.security.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -54,10 +55,9 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/**", "/api/users", "/api/users/", "/api/users/doctors", "/api/doctors", "/api/doctors/", "/api/admin", "/api/admin/").permitAll()
-                        .requestMatchers("/api/users/**").hasRole("USER")
-                        .requestMatchers("/api/doctors/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/auth/**", "/api/users", "/api/users/", "/api/users/doctors", "/api/users/doctors/**", "/api/doctors", "/api/doctors/", "/api/admin", "/api/admin/").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -69,11 +69,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173/", "http://localhost:5174/", "http://localhost:5175/"));
-        configuration.setAllowedMethods(List.of("GET","POST","DELETE","PUT","OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Content-Type","Authorization"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://[::1]:5173", "*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",configuration);

@@ -36,6 +36,12 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+//    get User by id
+    public UserDto getUser(int id) {
+        User user = repo.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        return mapper.userToDto(user);
+    }
+
 //    create user
     public UserDto createUser(UserDto dto){
         User user = mapper.dtoToUser(dto);
@@ -46,11 +52,13 @@ public class UserService {
     }
 
 //    update User profile
-    public UserDto updateUser(int id,UserDto dto){
+    public UserDto updateUser(int id, UserDto dto){
         User user = repo.findById(id).orElseThrow(()->new RuntimeException("User not found"));
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
         user.setGender(dto.getGender());
         user.setHeight(dto.getHeight());
         user.setWeight(dto.getWeight());

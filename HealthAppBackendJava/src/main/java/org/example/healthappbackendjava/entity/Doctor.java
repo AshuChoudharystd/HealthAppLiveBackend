@@ -1,13 +1,21 @@
 package org.example.healthappbackendjava.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import org.example.healthappbackendjava.enums.Gender;
-import org.example.healthappbackendjava.enums.Role;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+
+import org.example.healthappbackendjava.enums.Gender;
+import org.example.healthappbackendjava.enums.Role;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 @Entity
 public class Doctor {
@@ -38,7 +46,7 @@ public class Doctor {
     public LocalTime getAppointmentSlot() { return appointmentSlot; }
     public void setAppointmentSlot(LocalTime appointmentSlot) { this.appointmentSlot = appointmentSlot; }
 
-    @JsonManagedReference("doctor-appointments")
+    @JsonIgnore
     @OneToMany(mappedBy = "doctor")
     private List<Appointments> appointments;
 

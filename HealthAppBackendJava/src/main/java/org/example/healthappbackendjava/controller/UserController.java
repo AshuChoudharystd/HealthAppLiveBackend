@@ -1,9 +1,11 @@
 package org.example.healthappbackendjava.controller;
 
 import org.example.healthappbackendjava.dto.DoctorDto;
+import org.example.healthappbackendjava.dto.PrescriptionDto;
 import org.example.healthappbackendjava.dto.UserDto;
 import org.example.healthappbackendjava.entity.Appointments;
 import org.example.healthappbackendjava.entity.Doctor;
+import org.example.healthappbackendjava.service.PrescriptionService;
 import org.example.healthappbackendjava.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final PrescriptionService prescriptionService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PrescriptionService prescriptionService) {
         this.userService = userService;
+        this.prescriptionService = prescriptionService;
     }
 
     @PostMapping
@@ -27,8 +31,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(dto));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable int id) {
+        return ResponseEntity.ok(userService.getUser(id));
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable int id, @Valid @RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> updateUser(@PathVariable int id, @RequestBody UserDto dto) {
         return ResponseEntity.ok(userService.updateUser(id, dto));
     }
 
@@ -65,6 +74,11 @@ public class UserController {
     @PatchMapping("/appointments/{appId}/finish")
     public ResponseEntity<Appointments> appointmentFinished(@PathVariable int appId) {
         return ResponseEntity.ok(userService.appointmentFinished(appId));
+    }
+
+    @GetMapping("/{userId}/prescriptions")
+    public ResponseEntity<List<PrescriptionDto>> getUserPrescriptions(@PathVariable int userId) {
+        return ResponseEntity.ok(prescriptionService.getUserPrescriptions(userId));
     }
 
     @GetMapping("/doctors")

@@ -36,6 +36,12 @@ public class DoctorService {
         this.passwordEncoder = passwordEncoder;
     }
 
+//    get Doctor by id
+    public DoctorDto getDoctor(int id) {
+        Doctor doctor = docRepo.findById(id).orElseThrow(() -> new RuntimeException("Doctor not found"));
+        return mapper.doctorToDto(doctor);
+    }
+
 //    create Doctor
     public DoctorDto createDoctor(DoctorDto dto){
         Doctor doctor = mapper.dtoToDoctor(dto);
@@ -46,11 +52,13 @@ public class DoctorService {
     }
 
 //    Update Doctor Profile
-    public DoctorDto updateDoctor(int id,DoctorDto dto){
+    public DoctorDto updateDoctor(int id, DoctorDto dto){
         Doctor doctor = docRepo.findById(id).orElseThrow(()->new RuntimeException("Doctor not found"));
         doctor.setName(dto.getName());
         doctor.setEmail(dto.getEmail());
-        doctor.setPassword(passwordEncoder.encode(dto.getPassword()));
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            doctor.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
         doctor.setSpecialization(dto.getSpecialization());
         doctor.setPhoneNumber(dto.getPhoneNumber());
         doctor.setProfilePicture(dto.getProfilePicture());
