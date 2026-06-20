@@ -56,7 +56,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**", "/api/users", "/api/users/", "/api/users/doctors", "/api/users/doctors/**", "/api/doctors", "/api/doctors/", "/api/admin", "/api/admin/").permitAll()
+                        .requestMatchers("/auth/**", "/error", "/uploads/**", "/api/users", "/api/users/", "/api/users/doctors", "/api/users/doctors/**", "/api/doctors", "/api/doctors/", "/api/admin", "/api/admin/").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )

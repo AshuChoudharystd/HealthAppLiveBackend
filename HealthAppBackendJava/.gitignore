@@ -7,6 +7,9 @@ target/
 # Local secrets - never commit
 src/main/resources/application-local.properties
 
+# Development profile-image storage
+uploads/
+
 ### STS ###
 .apt_generated
 .classpath

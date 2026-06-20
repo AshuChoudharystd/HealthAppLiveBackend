@@ -1,0 +1,10 @@
+.git
+.github
+.idea
+.vscode
+target
+uploads
+*.log
+hs_err_pid*.log
+.env
+src/main/resources/application-local.properties

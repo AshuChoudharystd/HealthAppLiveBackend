@@ -14,6 +14,7 @@ import org.example.healthappbackendjava.repository.DoctorRepository;
 import org.example.healthappbackendjava.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,14 +27,16 @@ public class DoctorService {
     final private UserMapper uMapper;
 
     final private PasswordEncoder passwordEncoder;
+    final private FileStorageService fileStorageService;
 
-    public DoctorService(DoctorRepository docRepo, UserRepository userRepo, AppointmentRepository apRepo, DoctorMapper mapper, UserMapper uMapper, PasswordEncoder passwordEncoder) {
+    public DoctorService(DoctorRepository docRepo, UserRepository userRepo, AppointmentRepository apRepo, DoctorMapper mapper, UserMapper uMapper, PasswordEncoder passwordEncoder, FileStorageService fileStorageService) {
         this.docRepo = docRepo;
         this.userRepo = userRepo;
         this.apRepo = apRepo;
         this.mapper = mapper;
         this.uMapper = uMapper;
         this.passwordEncoder = passwordEncoder;
+        this.fileStorageService = fileStorageService;
     }
 
 //    get Doctor by id
@@ -84,6 +87,16 @@ public class DoctorService {
         appointment.setStatus(AppointmentStatus.CANCELLED);
         apRepo.save(appointment);
         return appointment;
+    }
+
+//    update profile picture
+    public DoctorDto updateProfilePicture(int id, MultipartFile file) {
+        Doctor doctor = docRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        String imageUrl = fileStorageService.uploadFile(file);
+        doctor.setProfilePicture(imageUrl);
+        docRepo.save(doctor);
+        return mapper.doctorToDto(doctor);
     }
 
 //    get user profile

@@ -8,10 +8,13 @@ import org.example.healthappbackendjava.entity.Doctor;
 import org.example.healthappbackendjava.service.PrescriptionService;
 import org.example.healthappbackendjava.service.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 
 @RestController
@@ -39,6 +42,17 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable int id, @RequestBody UserDto dto) {
         return ResponseEntity.ok(userService.updateUser(id, dto));
+    }
+
+    @PutMapping(value = "/{id}/profile-picture",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserDto> updateProfilePicture(
+            @PathVariable int id,
+            @RequestParam("profilePicture") MultipartFile file) {
+
+        return ResponseEntity.ok(
+                userService.updateProfilePicture(id, file)
+        );
     }
 
     @DeleteMapping("/{id}")

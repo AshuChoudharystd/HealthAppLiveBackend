@@ -7,8 +7,10 @@ import org.example.healthappbackendjava.entity.Appointments;
 import org.example.healthappbackendjava.service.DoctorService;
 import org.example.healthappbackendjava.service.PrescriptionService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -38,6 +40,13 @@ public class DoctorController {
     @PutMapping("/{id}")
     public ResponseEntity<DoctorDto> updateDoctor(@PathVariable int id, @RequestBody DoctorDto dto) {
         return ResponseEntity.ok(doctorService.updateDoctor(id, dto));
+    }
+
+    @PutMapping(value = "/{id}/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<DoctorDto> updateProfilePicture(
+            @PathVariable int id,
+            @RequestParam("profilePicture") MultipartFile file) {
+        return ResponseEntity.ok(doctorService.updateProfilePicture(id, file));
     }
 
     @GetMapping("/{docId}/appointments")

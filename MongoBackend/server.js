@@ -4,6 +4,9 @@ const {Server} = require('socket.io');
 const cors = require('cors');
 const Message = require('./MsgModel');
 const connectDb = require('./connectDb');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+dotenv.config();
 
 connectDb();
 
@@ -17,16 +20,27 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
+        origin: [process.env.FRONTEND_URL, "http://localhost:5174", "http://localhost:5175"],
         methods: ["GET", "POST"],
     }
 });
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
+    origin: [process.env.FRONTEND_URL, "http://localhost:5174", "http://localhost:5175"],
 }));
 
-app.get('/messages/:userId1/:userId2', async (req, res) => {
+const verifyToken = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'No token provided' });
+    try {
+        req.user = jwt.verify(token, process.env.JWT_SECRET);
+        next();
+    } catch (err) {
+        res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
+app.get('/messages/:userId1/:userId2', verifyToken, async (req, res) => {
     try {
         const { userId1, userId2 } = req.params;
         const messages = await Message.find({
@@ -43,6 +57,24 @@ app.get('/messages/:userId1/:userId2', async (req, res) => {
 
 // userId -> socketId mapping
 const onlineUsers = new Map();
+
+io.use((socket, next) => {
+    const token = socket.handshake.auth.token;
+    if (!token) {
+        console.log('Socket auth failed: missing token');
+        return next(new Error('Authentication error'));
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            console.log('JWT verification failed:', err.message);
+            return next(new Error('Authentication error'));
+        }
+        const userId = decoded?.userId || decoded?.sub || decoded?.id;
+        socket.data.userId = String(userId ?? '');
+        next();
+    });
+});
 
 io.on('connection', (socket) => {
     console.log('A user connected: ' + socket.id);

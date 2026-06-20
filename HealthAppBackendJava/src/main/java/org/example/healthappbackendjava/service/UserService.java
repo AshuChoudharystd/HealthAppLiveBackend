@@ -14,6 +14,7 @@ import org.example.healthappbackendjava.repository.DoctorRepository;
 import org.example.healthappbackendjava.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,16 +25,18 @@ public class UserService {
     final private AppointmentRepository apRepo;
     final private DoctorRepository docRepo;
     final private DoctorMapper dMapper;
-
+    final private FileStorageService fileStorageService;
     final private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repo, UserMapper mapper, AppointmentRepository apRepo, DoctorRepository docRepo, DoctorMapper dMapper, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository repo, UserMapper mapper, AppointmentRepository apRepo, DoctorRepository docRepo, DoctorMapper dMapper,
+                       PasswordEncoder passwordEncoder, FileStorageService fileStorageService) {
         this.repo = repo;
         this.mapper = mapper;
         this.apRepo = apRepo;
         this.docRepo = docRepo;
         this.dMapper = dMapper;
         this.passwordEncoder = passwordEncoder;
+        this.fileStorageService = fileStorageService;
     }
 
 //    get User by id
@@ -64,8 +67,21 @@ public class UserService {
         user.setWeight(dto.getWeight());
         user.setAge(dto.getAge());
         user.setPhoneNumber(dto.getPhoneNumber());
-        user.setProfilePicture(dto.getProfilePicture());
         repo.save(user);
+        return mapper.userToDto(user);
+    }
+
+//    update the profile picture
+    public UserDto updateProfilePicture(int id, MultipartFile file){
+        User user = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String imageUrl = fileStorageService.uploadFile(file);
+
+        user.setProfilePicture(imageUrl);
+
+        repo.save(user);
+
         return mapper.userToDto(user);
     }
 
