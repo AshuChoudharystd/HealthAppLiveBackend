@@ -1,9 +1,13 @@
 package org.example.healthappbackendjava.service;
 
+import org.example.healthappbackendjava.config.CacheNames;
 import org.example.healthappbackendjava.dto.PrescriptionDto;
 import org.example.healthappbackendjava.entity.*;
 import org.example.healthappbackendjava.repository.AppointmentRepository;
 import org.example.healthappbackendjava.repository.PrescriptionRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +23,8 @@ public class PrescriptionService {
         this.prescriptionRepo = prescriptionRepo;
         this.appointmentRepo = appointmentRepo;
     }
-
+    @Caching(evict = {@CacheEvict(value = CacheNames.PRESCRIPTIONs, allEntries = true),
+        @CacheEvict(value = CacheNames.PRESCRIPTIONs, key = "#appointmentId")})
     public PrescriptionDto createPrescription(int appointmentId, PrescriptionDto dto) {
         Appointments appointment = appointmentRepo.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -47,13 +52,13 @@ public class PrescriptionService {
         prescriptionRepo.save(prescription);
         return toDto(prescription);
     }
-
+    @Cacheable(value = CacheNames.PRESCRIPTIONs, key = "#userId")
     public List<PrescriptionDto> getUserPrescriptions(int userId) {
         return prescriptionRepo.findByUserId(userId).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
-
+    @Cacheable(value = CacheNames.PRESCRIPTIONs, key = "#doctorId")
     public List<PrescriptionDto> getDoctorPrescriptions(int doctorId) {
         return prescriptionRepo.findByDoctorId(doctorId).stream()
                 .map(this::toDto)

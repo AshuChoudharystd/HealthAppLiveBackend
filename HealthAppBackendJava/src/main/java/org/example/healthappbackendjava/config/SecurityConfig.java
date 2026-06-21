@@ -6,11 +6,7 @@ import java.util.List;
 import org.example.healthappbackendjava.repository.AdminRepository;
 import org.example.healthappbackendjava.repository.DoctorRepository;
 import org.example.healthappbackendjava.repository.UserRepository;
-import org.example.healthappbackendjava.security.CustomUserDetailService;
-import org.example.healthappbackendjava.security.JwtAccessDeniedHandler;
-import org.example.healthappbackendjava.security.JwtAuthFilter;
-import org.example.healthappbackendjava.security.JwtAuthenticationEntryPoint;
-import org.example.healthappbackendjava.security.JwtUtil;
+import org.example.healthappbackendjava.security.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -27,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.example.healthappbackendjava.security.RedisRateLimitFilter;
 
 
 @Configuration
@@ -34,10 +31,12 @@ public class SecurityConfig {
 
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final JwtAccessDeniedHandler accessDeniedHandler;
-
-    public SecurityConfig(JwtAccessDeniedHandler accessDeniedHandler, JwtAuthenticationEntryPoint authenticationEntryPoint){
+    private final RedisRateLimitFilter redisRateLimitFilter;
+    public SecurityConfig(JwtAccessDeniedHandler accessDeniedHandler, JwtAuthenticationEntryPoint authenticationEntryPoint,
+                          RedisRateLimitFilter redisRateLimitFilter){
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.redisRateLimitFilter = redisRateLimitFilter;
     }
 
     @Bean
@@ -60,7 +59,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(redisRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthFilter, RedisRateLimitFilter.class)
                 .formLogin(form-> form.disable());
         return http.build();
     }
@@ -69,7 +69,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://[::1]:5173", "*"));
+        configuration.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://127.0.0.1:5173", "http://[::1]:5173", "https://health-connect-hub-black.vercel.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));

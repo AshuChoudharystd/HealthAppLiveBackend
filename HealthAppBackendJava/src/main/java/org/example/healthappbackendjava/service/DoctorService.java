@@ -1,5 +1,6 @@
 package org.example.healthappbackendjava.service;
 
+import org.example.healthappbackendjava.config.CacheNames;
 import org.example.healthappbackendjava.dto.DoctorDto;
 import org.example.healthappbackendjava.dto.DoctorMapper;
 import org.example.healthappbackendjava.dto.UserDto;
@@ -12,10 +13,14 @@ import org.example.healthappbackendjava.enums.Role;
 import org.example.healthappbackendjava.repository.AppointmentRepository;
 import org.example.healthappbackendjava.repository.DoctorRepository;
 import org.example.healthappbackendjava.repository.UserRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -39,7 +44,25 @@ public class DoctorService {
         this.fileStorageService = fileStorageService;
     }
 
+    private void updateAppointmentStatus(Appointments appointment){
+        if(appointment.getStatus() == AppointmentStatus.FINISHED
+                ||appointment.getStatus() == AppointmentStatus.CANCELLED){
+            return ;
+        }
+
+        LocalDateTime appointmentTime = LocalDateTime.of(
+                appointment.getAppointmentDate(),
+                appointment.getAppointmentEndTime()
+        );
+
+        if(appointmentTime.isBefore(LocalDateTime.now())) {
+            appointment.setStatus(AppointmentStatus.FINISHED);
+            apRepo.save(appointment);
+        }
+    }
+
 //    get Doctor by id
+    @Cacheable(value = CacheNames.DOCTOR, key = "#id")
     public DoctorDto getDoctor(int id) {
         Doctor doctor = docRepo.findById(id).orElseThrow(() -> new RuntimeException("Doctor not found"));
         return mapper.doctorToDto(doctor);
@@ -55,6 +78,8 @@ public class DoctorService {
     }
 
 //    Update Doctor Profile
+    @Caching(evict = {@CacheEvict(value = CacheNames.DOCTOR, key = "#id"),
+            @CacheEvict(value = CacheNames.DOCTORs, allEntries = true)})
     public DoctorDto updateDoctor(int id, DoctorDto dto){
         Doctor doctor = docRepo.findById(id).orElseThrow(()->new RuntimeException("Doctor not found"));
         doctor.setName(dto.getName());
@@ -72,16 +97,19 @@ public class DoctorService {
 //    Get All Appointments
     public List<Appointments> getDoctorAppointments(int docId){
         List<Appointments> appointments = apRepo.findByDoctorId(docId);
+        appointments.forEach(this::updateAppointmentStatus);
         return appointments;
     }
 
 //    get Appointment
     public Appointments getDoctorAppointment(int appId) {
         Appointments appointment = apRepo.findById(appId).orElseThrow(() -> new RuntimeException("Appointment not found"));
+        updateAppointmentStatus(appointment);
         return appointment;
     }
 
 //    cancel Appointment
+    @CacheEvict(value = CacheNames.APPOINTMENTs, key = "#appId")
     public Appointments cancelAppointment(int appId){
         Appointments appointment = apRepo.findById(appId).orElseThrow(()->new RuntimeException("Appointment not found"));
         appointment.setStatus(AppointmentStatus.CANCELLED);
